@@ -1,4 +1,4 @@
-function shortestPath111(list, start, end)
+function DijkstraAlgorithm(list, start, end)
 {
 	var now = start;
 	var path = [];
@@ -45,7 +45,6 @@ function shortestPath111(list, start, end)
 	for (var i = len - 1; i >= 0; --i) {
 		handledResult.push(result[i]);
 	}
-	console.log(handledResult);
 	return handledResult;
 }
 
@@ -68,14 +67,19 @@ function MST(list, start)
 		var numOfSuccessor = list[now].length;
 
 		for(var i = 0; i < numOfSuccessor; ++i) {
-			queue.addNode(list[now][i]);			
+			if (!used[list[now][i].next]) {
+				queue.addNode(list[now][i]);
+			}		
+		}
+		if (queue.isEmpty()) {
+			break;
 		}
 		var smallest = queue.popNode();
 		while (!queue.isEmpty() && used[smallest.ID] && used[smallest.next]) {
 			smallest = queue.popNode();
 		}
-		if (queue.isEmpty()) {
-			break;
+		if (used[smallest.ID] && used[smallest.next]){
+			continue;
 		}
 		used[smallest.ID] = true;
 		used[smallest.next] = true;
