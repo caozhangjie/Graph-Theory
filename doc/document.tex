@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage[nonatbib,final]{nips_2016}
+\usepackage{natbib}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{subfigure} 
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{url}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+\title{Graph Theory Project}
+\author{
+Zhangjie Cao$^\dag$, Ruijie Tang$^\dag$, and Guanglin Yu$^\dag$\\
+$^\dag$School of Software, Tsinghua University, Beijing 100084, China\\
+\texttt{caozhangjie14@gmail.com, thss15\_tangrj@163.com, thss15\_yugl@163.com}\\
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+
+\section{Procedure}
+\subsection{Crawler}
+We crawler 1000 users' information of douban, which is mainly comprised of user comment on movies. The ratings can reflect the user's taste on movies, where the similarity of their ratings on movies can be regarded as that of their thinkings. Thus we use user's ratings as the criterion to decide the value of each edge.
+We first crawler top 250 movies on douban and get the users at the front of the comment list since they are relatively more popular and watched more movies than others. Then we crawler their information. 
+If the crawler sends requests to the server too frequently, the server will ban this client. So we use proxy technology, where we fool the server using false ip addresses.
+
+\subsection{Data Processing}
+We select 60102 widely known movies (at least 500 people commented this movie) and make every user as a vector of ratings, where each element of the vector is the rating which this user gives the corresponding movie. In the processing procedure, we met the problem that some users just watched one movie and commented on it without giving any rating. For this situation, we read the comment and judge the user's taste on this movie and estimate the rating. 
+Then if a user didn't watch one of these 60102 movies, according to the instruction of the homework, the similarity of these two users should be 0. But we have some new ideas. We think that assuming that there are three users A, B and C. A and B watch the same movie but C doesn't watch the movie. Then A gives the movie the lowest rating but B gives the movie the highest rating. Through this information, we can get that A and B have exactly different tastes on movie but we cannot judge whether C is similar to A or B. We should only give equal similarity to AC and BC. So we should give the middle rating to these blanks. We set these ratings 2.5.
+With the previous steps, we get the rating matrix where every row is the rating of one user giving to the movies. Then we calculate the Euclidean distance of every two rows and normalizes all the distance to 0 to 1. Then we use 1 to substract the normalized distance as the similarity of two users. This similarity is also the metric of edge.
+
+\subsection{Visualization}
+
+\section{Algorithm}
+\subsection{Basic Algorithm}
+ 
+\subsection{Advanced Algorithm}
+ 
+\section{Result}
+  
+\section{Conclusion}
+
+%\begin{figure}[h]
+%  \centering
+%  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+%  \caption{Sample figure caption.}
+%\end{figure}
+
+\section{Acknowledgments}
+ 
+
+\begin{small}
+\bibliographystyle{unsrt}
+\bibliography{document} 
+\end{small}
+
+\medskip
+
+\end{document}
