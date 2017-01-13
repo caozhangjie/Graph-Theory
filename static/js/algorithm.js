@@ -1,4 +1,3 @@
-
 function shortestPath111(list, start, end)
 {
 	var now = start;
@@ -46,6 +45,7 @@ function shortestPath111(list, start, end)
 	for (var i = len - 1; i >= 0; --i) {
 		handledResult.push(result[i]);
 	}
+	console.log(handledResult);
 	return handledResult;
 }
 
@@ -102,7 +102,6 @@ function KruskalMST(links, start){
 
 	have_node[start.name] = 0;
 	id_equal[0] = 0;
-	console.log(links);
 
 	for (var i = 0; i < len_of_links; ++i){
 		if (have_node[links[i].source.name] == undefined && have_node[links[i].target.name] != undefined){
@@ -144,6 +143,83 @@ function KruskalMST(links, start){
 		}
 	}
 	return return_edge;
+}
+
+function FloydAlgorithm(list, node_info, links){
+	var arr = {};
+	var numOfVertex = node_info.length;
+	var numOfLink = links.length;
+	var pre = {};
+
+	for (var i = 0; i < numOfVertex; ++i) {
+		arr[i] = [];
+		pre[i] = [];
+		for (var j = 0; j < numOfVertex; ++j) {
+			arr[i].push(100000);
+			pre[i].push(-1);
+		}
+	}
+	for (var i = 0; i < numOfLink; ++i) {
+		var m = links[i].source.name;
+		var n = links[i].target.name;
+		var w = links[i].value;
+		arr[m][n] = arr[n][m] = w;
+		pre[m][n] = m;
+		pre[n][m] = n;
+	}
+	for (var i = 0; i < numOfVertex; ++i) {
+		arr[i][i] = 0;
+		pre[i][i] = i;
+	}
+	for (var k = 0; k < numOfVertex; ++k)
+		for (var i = 0; i < numOfVertex; ++i)
+			for (var j = 0; j < numOfVertex; ++j) {
+				if (arr[i][j] > arr[i][k] + arr[k][j]) {
+					arr[i][j] = arr[i][k] + arr[k][j];
+					pre[i][j] = k;
+				}
+			}
+	var temp1;
+	for (var k = 0; k < numOfVertex; ++k)
+		for (var i = 0; i < numOfVertex; ++i){
+			temp1 = k;
+			if(pre[temp1][i] != -1){
+				while(pre[temp1][i] != temp1){
+					temp1 = pre[temp1][i];
+				}
+				pre[k][i] = temp1;
+			}
+		}	
+	return pre;
+}
+
+function FordAlgorithm(list, start){
+	var len_of_list = Object.keys(list).length;
+	var pre = [];
+	var path_len = [];
+	var new_expand_node = [];
+	for (var i = 0; i < len_of_list; ++i){
+		pre[i] = 100000;
+		path_len[i] = 100000;
+	}
+	pre[start] = -1;
+	path_len[start] = 0;
+	new_expand_node = [start];
+	var cur_node;
+	var len_of_current_next;
+	while(new_expand_node.length > 0){
+		cur_node = new_expand_node.shift();
+		len_of_current_next = list[cur_node].length;
+		for (var i = 0; i < len_of_current_next; ++i){
+			if (path_len[list[cur_node][i].next] > path_len[cur_node] + list[cur_node][i].value){
+				path_len[list[cur_node][i].next] = path_len[cur_node] + list[cur_node][i].value;
+				pre[list[cur_node][i].next] = cur_node;
+				new_expand_node.push(list[cur_node][i].next);
+			}
+		}
+	}
+	console.log(pre);
+	return pre;
 }
 
 /*function KruskalMST(links, node_info)
@@ -234,7 +310,6 @@ function pointCloseness1(list, node_info, links)
 			total[i] /= max_num;	
 		}
 	}
-	console.log(total);
 	return total;
 }
 
@@ -304,7 +379,6 @@ function pointBetweeness1(list, node_info)
 	for (var i = 0; i < blength; i++){
 		betweeness[i] = Math.pow(betweeness[i] / maxValue, 1.0 / 3.0);
 	}
-	console.log(betweeness);
 	return betweeness;
 }
 
