@@ -481,7 +481,7 @@ function connectedComponent1(list, node_info, this_node) {
 	return need_node;
 }
 
-// T为迭代次数, r为分区阈值, 取T=20, r=0.5
+// T为迭代次数, r为分区阈值, 取T=20, r=0.5, 根据效果可以改变
 function SLPA(list, node_info, T, r) {
     for (var i = 0; i < T; ++i) {
         node_info = Listen(list, node_info);
