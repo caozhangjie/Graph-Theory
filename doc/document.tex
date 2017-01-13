@@ -17,6 +17,7 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{amsmath}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 \title{Graph Theory Project}
@@ -51,16 +52,76 @@ With the previous steps, we get the rating matrix where every row is the rating 
 
 \section{Algorithm}
 \subsection{Basic Algorithm}
+We implement all of the required basic algorithms: Prim Algorithm, Kruskal Algorithm, Dijkstra Algorithm, Ford Algorithm, Floyd Algorithm, Betweenness Centrality and Closeness Centrality. We choose to use JavaScript to implement all of the algorithm.
 \subsubsection{Prim Algorithm}
+Our goal is to find a minimum spanning tree for a weighted undirected graph by giving a starting vertex. This means we have to find a subset of the edges that forms a tree that includes every vertex, where the total weight of all the edges in the tree is minimized.\\
+The algorithm operates by building this tree one vertex at a time, from the given starting vertex, at each step adding the cheapest possible connection from the tree to another vertex.
+Detailed steps are as follows:\\\\
+1. Initialize a tree with a single vertex, chosen by the user.\\\\
+2. Grow the tree by one edge: of the edges that connect the tree to vertices not yet in the tree, find the minimum-weight edge, and transfer it to the tree.\\\\
+3. Repeat step 2 (until all vertices are in the tree).\\\\
+We use the adjacency list to represent the edges in the graph. Besides, in order to accelerate the choosen of the edge with minimal weight, we implement the PriorityQueue object by ourselves. The PriorityQueue use Fibonacci heap to accelerate the choosing process.
 \subsubsection{Kruskal Algorithm}
 \subsubsection{Dijkstra Algorithm}
+Our goal is to find the shortest path between two choosen nodes. The steps of the algorithm is as follows:\\\\
+1.Assign to every node a tentative distance value: set it to zero for our initial node and to infinity for all other nodes.\\\\
+2.Set the initial node as current. Mark all other nodes unvisited. Create a set of all the unvisited nodes called the unvisited set.\\\\
+3.For the current node, consider all of its unvisited neighbors and calculate their tentative distances. Compare the newly calculated tentative distance to the current assigned value and assign the smaller one. For example, if the current node A is marked with a distance of 6, and the edge connecting it with a neighbor B has length 2, then the distance to B (through A) will be 6 + 2 = 8. If B was previously marked with a distance greater than 8 then change it to 8. Otherwise, keep the current value.\\\\
+4.When we are done considering all of the neighbors of the current node, mark the current node as visited and remove it from the unvisited set. A visited node will never be checked again.\\\\
+5.If the destination node has been marked visited (when planning a route between two specific nodes) or if the smallest tentative distance among the nodes in the unvisited set is infinity (when planning a complete traversal; occurs when there is no connection between the initial node and remaining unvisited nodes), then stop. The algorithm has finished.\\\\
+6.Otherwise, select the unvisited node that is marked with the smallest tentative distance, set it as the new "current node", and go back to step 3.\\\\
+We also use adjacency list to represent the edges with weight in the graph. And we use Fibonacci heap to achieve the $O(E + VlogV)$ time complexity.
 \subsubsection{Ford Algorithm}
 \subsubsection{Floyd Algorithm}
 \subsubsection{Betweenness Centrality}
+Betweenness centrality is a measure of centrality in a graph based on shortest paths. For every pair of vertices in a graph, there exists a shortest path between the vertices such that either the number of edges that the path passes through (for undirected graphs) or the sum of the weights of the edges (for directed graphs) is minimized. The betweenness centrality for each vertex is the number of these shortest paths that pass through the vertex. And our goal is to calculate the betweenness centrality for all of the nodes in the graph.
+The betweenness centrality of a node \mbox{\boldmath $v$} is given by the expression:
+\[g(v) = \sum_{s\neq v\neq t}\frac{\sigma_{st}(v)}{\sigma_{st}}\]
+where \mbox{\boldmath $\sigma_{st}$} is the total number of shortest paths from node \mbox{\boldmath $s$} to node \mbox{\boldmath $t$} and \mbox{\boldmath $\sigma_{st}(v)$} is the number of those paths that pass through \mbox{\boldmath $v$}.
+Note that the betweenness centrality of a node scales with the number of pairs of nodes as implied by the summation indices. Therefore, the calculation may be rescaled by dividing through by the number of pairs of nodes not including \mbox{\boldmath $v$}, so that \mbox{\boldmath $g \in [0,1]$}. The division is done by \mbox{\boldmath $(N - 1)(N - 2)/2$} for directed graphs and \mbox{\boldmath $(N - 1)(N - 2)/2$} for undirected graphs, where \mbox{\boldmath $N$} is the number of nodes in the giant component. Note that this scales for the highest possible value, where one node is crossed by every single shortest path. This is often not the case, and a normalization can be performed without a loss of precision
+\[normal(g(v)) = \frac{g(v) - min(g)}{max(g) - min(g)}\]
+which results in:
+\[max(normal) = 1\]
+\[min(normal) = 0\]
+Note that this will always be a scaling from a smaller range into a larger range, so no precision is lost.\\
+Calculating the betweenness centralities of all the vertices in a graph involves calculating the shortest paths between all pairs of vertices on a graph, which takes ${\displaystyle \Theta (|V|^{3})}$ time with the Floyd–Warshall algorithm, modified to not only find one but count all shortest paths between two nodes.\\
+In calculating betweenness centralities of all vertices in a graph, it is assumed that graphs are undirected and connected with the allowance of loops and multiple edges. When specifically dealing with network graphs, often graphs are without loops or multiple edges to maintain simple relationships.\\
+The betweenness of a vertex ${\displaystyle v}$ in a graph ${\displaystyle G:=(V,E)} $ with ${\displaystyle V}$ vertices is computed as follows:\\\\
+1.For each pair of vertices (s,t), compute the shortest paths between them.\\\\
+2.For each pair of vertices (s,t), determine the fraction of shortest paths that pass through the vertex in question (here, vertex v).\\\\
+3.Sum this fraction over all pairs of vertices (s,t).\\\\
+We use adjacency list to represent the edges, and in the algorithm we use queue and stack.
 \subsubsection{Closeness Centrality}
+In a connected graph, the closeness centrality of a node is a measure of centrality in a network, calculated as the sum of the length of the shortest paths between the node and all other nodes in the graph. Thus the more central a node is, the closer it is to all other nodes.\\
+Closeness was defined as the reciprocal of the farness, that is:
+\[C(x) = \frac{1}{\sum_{y}d(y, x)}\]
+where $d(y, x)$ is the distance between vertices $x$ and $y$.\\
+When a graph is not strongly connected, a widespread idea is that of using the sum of reciprocal of distances, instead of the reciprocal of the sum of distances, with the convention $1/\infty = 0$:
+\[H(x) = \sum_{y\neq x}\frac{1}{d(y, x)}\]
+In the classic definition of the closeness centrality, the spread of information is modeled by the use of shortest paths. This model might not be the most realistic for all types of communication scenarios. Thus, related definitions have been discussed to measure closeness.\\
+Calculating the closeness centralities of all the vertices in a graph also involves calculating the shortest paths between all pairs of vertices on a graph.\\
+In calculating closeness centralities of all vertices in a graph, it is assumed that graphs are undirected and connected with the allowance of loops and multiple edges. When specifically dealing with network graphs, often graphs are without loops or multiple edges to maintain simple relationships.\\
+The steps of the algorithm are as follows:\\\\
+1.Calculating the shortest paths between all pairs of vertices on a graph using Floyd–Warshall algorithm.\\\\
+2.Calculate the closeness centralities based on the adjacency matrix.\\\\
+3.Normalize the closeness by dividing the max centrality.\\\\
+We use adjacency matrix to implement the Floyd-Warshall algorithm and post-processing.
 \subsection{Advanced Algorithm}
 \subsubsection{jerry algorithm}
-
+Community structure is considered to be a signnificant property of real-world social networks. In this project we implement an efficient algorithm for detecting both individual overlapping nodes and overlapping communities using the underlying network structure alone. This algorithm is called SLPA$^{[1]}$.\\
+This algorithm is an extension of the Label Propagation Algorithm(LPA). In LPA, each node holds only a single label and iteratively updates it to its neighborhood majority label. This algorithm accounts for overlap by allowing each node to possess multiple labels but it uses different dynamics with more general features.\\
+SLPA mimics human pairwise communication behavior. In each communication step, one node is a speaker(information provider), and the other is a listener(information consumer). Unlike other algorithms, each node has a $memory$ of the labels received in the past and takes its content into account to make the current decisions. This allows SLPA to avoid producing a number of small size communities as opposed to other algorithms.\\
+The steps of this algorithm are as follows:\\\\
+1.The $memory$ of each node is initialized with a unique label, in our project, we initialize it with the node's id.\\\\
+2.The following steps are repeated until the maximum iteration $T$ is reached:\\\\
+a. One node is selected as a listener. In our project we choose the node in the order of node's id.\\\\
+b. Each neighbor of the selected node randomly selects a label with probability proportional to the occurrence frequency of this label in its memory and sends the selected label to the listener.\\\\
+c. The listener adds the most popular label received to its memory.\\\\
+3. The post-processing based on the labels in the memories and the threshold $r$ is applied to output the communities.\\\\
+The algorithm explores the network and outputs the desired number of communities in the end. The size of memory increases by one for each node at each step. When $T$ is greater than 20, the algorithm produces stable outputs. Although SLPA is non-deterministic due to the random selection and ties, it performs well on average.\\
+In SLPA, the detection of communities is performed when the stored information is post-processed. Given the memory of a node, SLPA converts it into a probability distribution of labels. Since labels represent community id, this distribution naturally defines the $strength$ of association to communities to which the node belongs. To preduce $crisp$ communities in which the membership of a node to a given community is binary, i.e., either a node is in a community or not, a simple thresholding procedure is performed: if the probability of seeing a particular label during the whole process is less than a given threshold $r \in [0, 0.5]$, this label is deleted. After thresholding, connected nodes having a particular label are grouped together and form a community. If a node contains multiple labels, it belongs to more than one community. A smaller value of $r$ produces a larger number of communities. When $r\geq 0.5$, SLPA outputs disjoint communities.\\
+Noted that in our opinion, a single node can't be a community so we delete it.\\
+We use adjacency list to represent the edges in the graph and store the $memory$ information in the node structure. Then we use a receiveList to choose the most popular node from the $Speaker$. Finally, we use a two-dimension array to store all of the communities.
 \subsubsection{Information Flow}
  
 \section{Result}
