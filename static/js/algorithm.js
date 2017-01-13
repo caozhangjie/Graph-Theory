@@ -480,3 +480,93 @@ function connectedComponent1(list, node_info, this_node) {
 
 	return need_node;
 }
+
+function SLPA(list, node_info, T, r) {
+    for (var i = 0; i < T; ++i) {
+        node_info = Listen(list, node_info);
+    }
+
+    return PostProcessing(node_info, r);
+}
+
+function Listen(list, node_info) {
+    var num_of_node = node_info.length;
+    for (var i = 0; i < num_of_node; ++i) {
+        var num_of_speaker = list[i].length;    // i结点的后继个数
+        var receive_list = [];      // 用于存储从Speak函数返回的pair, 形式为{"id": ,"times": }
+        for (var j = 0; j < num_of_node; ++j) {
+            receive_list[j] = { "id": j, "times": 0 };
+        } // init
+        for (var j = 0; j < num_of_speaker; ++j) {
+            var id = list[i][j]["next"];     //获取i结点的邻接点的id
+            Speak(receive_list, node_info[id]["memory"]);
+        }
+        var length_of_receive_list = receive_list.length;
+        var most_popular_id = -1;
+        var most_popular_times = 0;
+        for (var j = 0; j < length_of_receive_list; ++j) {
+            if (receive_list[j]["times"] > most_popular_times) {
+                most_popular_id = receive_list[j]["id"];
+                most_popular_times = receive_list[j]["times"];
+            }
+        } // 获取最受欢迎的结点id
+        if (most_popular_id != -1) {
+            ++node_info[i]["memory"][most_popular_id].times;       // 增加最受欢迎的结点的id出现次数
+        }
+    } // 对邻接表的每一个结点进行处理
+    return node_info;
+}
+
+function Speak(receive_list, memory) {
+    var num_of_node = memory.length;
+    var choose_list = [];   // 用于随机时选择的list
+    for (var i = 0; i < num_of_node; ++i) {
+        for (var j = 0; j < memory[i].times; ++j) {
+            choose_list.push(i);    // choose_list中存放的是待选择点的id
+        }
+    }
+    var choose = Math.random() * choose_list.length;
+    var result_id = choose_list[Math.floor(choose)];
+    ++receive_list[result_id].times;
+}
+
+function PostProcessing(node_info, r) {
+    var num_of_node = node_info.length;
+    var pre_result = [];
+    for (var i = 0; i < num_of_node; ++i) {
+        Process(node_info[i]["memory"], r);
+        node_info[i]["community"] = [];
+        for (var j = 0; j < num_of_node; ++j) {
+            if (node_info[i]["memory"][j].times != 0) {
+                if (pre_result[j] == undefined) {
+                    pre_result[j] = [i];
+                }
+                else {
+                    pre_result[j].push(i);
+                }
+            }
+        }
+    }
+
+    var result = [];
+    for (var i = 0; i < num_of_node; ++i) {
+        if (pre_result[i] != undefined) {
+            result.push(pre_result[i]);
+        }
+    }
+    return result;
+}
+
+function Process(memory, r) {
+    var sum = 0;
+    var length = memory.length;
+    for (var i = 0; i < length; ++i) {
+        sum += memory[i].times;
+    }
+    var threshold = r * sum;
+    for (var i = 0; i < length; ++i) {
+        if (memory[i].times < threshold) {
+            memory[i].times = 0;
+        }
+    }
+}
