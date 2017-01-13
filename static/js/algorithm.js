@@ -1,0 +1,404 @@
+
+function shortestPath111(list, start, end)
+{
+	var now = start;
+	var path = [];
+	var used = [];
+	var lenOfList = Object.keys(list).length;
+	var queue = new PriorityQueue(function(a, b) {
+		return a.value - b.value;
+	})
+	for (var i = 0; i < lenOfList; ++i) {
+		path[i] = {"value": 0, "pre": -1, "IDOfLink": -1};
+		used[i] = false;
+	}
+
+	used[now] = true;
+	while (now != end) {
+		var numOfSuccessor = list[now].length;
+		for(var i = 0; i < numOfSuccessor; ++i) {
+			queue.addNode({"value":list[now][i].value + path[now].value, "ID":list[now][i].ID, "IDOfLink":list[now][i].IDOfLink, "next":list[now][i].next});			
+		}
+		if (queue.isEmpty()) {
+			break;
+		}
+		var smallest = queue.popNode();
+		while (!queue.isEmpty() && used[smallest.ID] && used[smallest.next]) {
+			smallest = queue.popNode();
+		}
+		used[smallest.ID] = true;
+		used[smallest.next] = true;
+		path[smallest.next] = {"value": smallest.value, "pre": smallest.ID, "ID": smallest.IDOfLink};
+		now = smallest.next;
+	}
+	if (now != end) {
+		return [];
+	}
+
+	var result = [];
+	while (end != start) {
+		result.push(path[end].ID);
+		end = path[end].pre;
+	}
+
+	var handledResult = [];
+	var len = result.length;
+	for (var i = len - 1; i >= 0; --i) {
+		handledResult.push(result[i]);
+	}
+	return handledResult;
+}
+
+function MST(list, start)
+{
+	var now = start.name;
+	var path = [];
+	var used = [];
+	var lenOfList = Object.keys(list).length;
+	var queue = new PriorityQueue(function(a, b) {
+		return a.value - b.value;
+	})
+	for (var i = 0; i < lenOfList; ++i) {
+		path[i] = {"value": 0, "pre": -1, "ID": -1};
+		used[i] = false;
+	}
+
+	used[now] = true;
+	while (true) {
+		var numOfSuccessor = list[now].length;
+
+		for(var i = 0; i < numOfSuccessor; ++i) {
+			queue.addNode(list[now][i]);			
+		}
+		var smallest = queue.popNode();
+		while (!queue.isEmpty() && used[smallest.ID] && used[smallest.next]) {
+			smallest = queue.popNode();
+		}
+		if (queue.isEmpty()) {
+			break;
+		}
+		used[smallest.ID] = true;
+		used[smallest.next] = true;
+		path[smallest.next] = {"value": smallest.value, "pre": smallest.ID, "ID": smallest.IDOfLink};			
+		now = smallest.next;
+	}
+
+	var edge = [];
+	for (var i = 0; i < lenOfList; ++i) {
+		if (path[i].pre != -1) {
+			edge.push(path[i].ID);
+		}
+	}
+	return edge;
+}
+
+function KruskalMST(links, start){
+	var have_node = {};
+	var id_equal = {};
+	var edge = [[]];
+	var return_edge = [];
+	var len_of_links = links.length;
+	var tree_id = 1;
+
+	have_node[start.name] = 0;
+	id_equal[0] = 0;
+	console.log(links);
+
+	for (var i = 0; i < len_of_links; ++i){
+		if (have_node[links[i].source.name] == undefined && have_node[links[i].target.name] != undefined){
+			have_node[links[i].source.name] = have_node[links[i].target.name];
+			edge[have_node[links[i].target.name]].push(links[i].id);
+		}
+		else if(have_node[links[i].source.name] != undefined && have_node[links[i].target.name] == undefined){
+			have_node[links[i].target.name] = have_node[links[i].source.name];
+			edge[have_node[links[i].source.name]].push(links[i].id);
+		}
+		else if(have_node[links[i].source.name] == undefined && have_node[links[i].target.name] == undefined) {
+			have_node[links[i].target.name] = tree_id;
+			have_node[links[i].source.name] = tree_id;
+			edge.push([links[i].id]);
+			id_equal[tree_id] = tree_id;
+			tree_id ++;
+		}
+		else{
+			if(id_equal[have_node[links[i].source.name]] > id_equal[have_node[links[i].target.name]]){
+				id_equal[have_node[links[i].source.name]] = id_equal[have_node[links[i].target.name]];
+				edge[id_equal[have_node[links[i].target.name]]].push(links[i].id);
+			}
+			else if (id_equal[have_node[links[i].source.name]] < id_equal[have_node[links[i].target.name]]){
+				id_equal[have_node[links[i].target.name]] = id_equal[have_node[links[i].source.name]];
+				edge[id_equal[have_node[links[i].source.name]]].push(links[i].id);
+			}
+		}
+	}
+	for (var i = 0; i < tree_id; ++i){
+		id_equal[i] = id_equal[id_equal[i]];
+	}
+	var len_of_id_equal;
+	for (var i = 0; i < tree_id; ++i){
+		if (id_equal[i] == 0){
+			len_of_id_equal = edge[i].length;
+			for (var j = 0; j < len_of_id_equal; ++j){
+				return_edge.push(edge[i][j]);
+			}
+		}
+	}
+	return return_edge;
+}
+
+/*function KruskalMST(links, node_info)
+{
+	var have_node = {};
+	var edge = [];
+	var tree_id = 0;
+	for (val in links){
+		if (have_node[val.source.name] == undefined && have_node[val.target.name] == undefined){
+			have_node[val.source.name] = tree_id;
+			have_node[val.target.name] = tree_id;
+			tree_id ++;
+			edge.push([val.IDOfLink]);
+		}
+		else if (have_node[val.source.name] == undefined || have_node[val.target.name] == undefined){
+			if (have_node[val.source.name] == undefined){
+				have_node[val.source.name] = have_node[val.target.name];
+				edge[have_node[val.source.name]].push([val.IDOfLink]);
+			}
+			else{
+				have_node[val.target.name] = have_node[val.source.name];
+				edge[have_node[val.source.name]].push([val.IDOfLink]);
+			}
+		}
+	}
+	return edge;
+}*/
+
+function pointCloseness1(list, node_info, links)
+{
+	var arr = {};
+	var numOfVertex = node_info.length;
+	var numOfLink = links.length;
+	for (var i = 0; i < numOfVertex; ++i) {
+		arr[i] = [];
+		for (var j = 0; j < numOfVertex; ++j) {
+			arr[i].push(100000);
+		}
+	}
+	for (var i = 0; i < numOfLink; ++i) {
+		var m = links[i].source.name;
+		var n = links[i].target.name;
+		var w = links[i].value;
+		arr[m][n] = arr[n][m] = w;
+	}
+	for (var i = 0; i < numOfVertex; ++i) {
+		arr[i][i] = 0;
+	}
+	for (var k = 0; k < numOfVertex; ++k)
+		for (var i = 0; i < numOfVertex; ++i)
+			for (var j = 0; j < numOfVertex; ++j) {
+				if (arr[i][j] > arr[i][k] + arr[k][j]) {
+					arr[i][j] = arr[i][k] + arr[k][j];
+				}
+			}
+
+	var max_distance = 0;
+	for (var i = 0; i < numOfVertex; ++i)
+		for (var j = 0; j < numOfVertex; ++j) {
+			if (arr[i][j] > max_distance && arr[i][j] < 100000){
+				max_distance = arr[i][j];
+			}
+		}
+
+	var max_num = 0;
+	var total = [];
+	var temp = 0;
+	for (var i = 0; i < numOfVertex; ++i) {
+		for (var j = 0; j < numOfVertex; ++j) {
+			if (arr[i][j] < 100000){
+				temp += arr[i][j];
+			}
+			else{
+				temp += max_distance * 2;
+			}
+		}
+		total.push(temp);
+		if (max_num < temp){
+			max_num = temp;
+		}
+		temp = 0;
+	}
+	for (var i = 0; i < numOfVertex; ++i) {
+		if(total[i] >= 100000){
+			total[i] = 1.0
+		}
+		else{
+			total[i] /= max_num;	
+		}
+	}
+	console.log(total);
+	return total;
+}
+
+function pointBetweeness1(list, node_info)
+{
+	var betweeness = [];
+	var numOfVertex = node_info.length;
+	for (var i = 0; i < numOfVertex; ++i) {
+		betweeness[i] = 0;
+	}
+
+	for (var s = 0; s < numOfVertex; ++s) {
+		var stack = [];
+		var queue = [];
+		var P = {};
+		var sigema = [];
+		var delta = [];
+		var d = [];
+		for (var j = 0; j < numOfVertex; ++j) {
+			P[j] = [];
+			sigema[j] = 0;
+			d[j] = -1;
+			delta[j] = 0;
+		}
+		sigema[s] = 1;
+		d[s] = 0;
+
+		queue.push(node_info[s]);
+		while (queue.length > 0) {
+			var v = queue.shift();
+			stack.push(v);
+			var numOfSuccessor = list[v.id].length;
+			for (var k = 0; k < numOfSuccessor; ++k) {
+				var w = node_info[list[v.id][k].next];
+				if (d[w.id] < 0) {
+					queue.push(w);
+					d[w.id] = d[v.id] + 1;
+				}
+
+				if (d[w.id] == d[v.id] + 1) {
+					sigema[w.id] = sigema[w.id] + sigema[v.id];
+					P[w.id].push(v);
+				}
+			}
+		}
+
+		while (stack.length > 0) {
+			var w = stack.pop();
+			var len = P[w.id].length;
+			for (var i = 0; i < len; ++i) {
+				var v = P[w.id][i];
+				delta[v.id] = delta[v.id] + (sigema[v.id] / sigema[w.id]) * (1 + delta[w.id]);
+				if (w.id != s) {
+					betweeness[w.id] = betweeness[w.id] + delta[w.id];
+				}
+			}
+		}
+	}
+
+	var blength = betweeness.length;
+	var maxValue = 0;
+	for (var i = 0; i < blength; i++){
+		if (betweeness[i] > maxValue){
+			maxValue = betweeness[i];
+		}
+	}
+	for (var i = 0; i < blength; i++){
+		betweeness[i] = Math.pow(betweeness[i] / maxValue, 1.0 / 3.0);
+	}
+	console.log(betweeness);
+	return betweeness;
+}
+
+/*function strongConnectedComponent(list, node_info)
+{
+	var index = 0;
+	var connected = [];
+	var stack = [];
+	var map = [];
+	var numOfVertex = node_info.length;
+	for (var i = 0; i < numOfVertex; ++i) {
+		node_info[i]["index"] = undefined;
+		node_info[i]["lowlink"] = undefined;
+		map[i] = false;
+	}
+	for (var i = 0; i < numOfVertex; ++i) {
+		if (node_info[i]["index"] == undefined) {
+			strongConnect(node_info[i]);
+		}
+	}
+
+	function strongConnect(v)
+	{
+		v.index = index;
+		v.lowlink = index;
+		++index;
+		stack.push(v);
+		map[v.ID] = true;
+
+		var len = list[v.ID].length;
+		for (var i = 0; i < len; ++i) {
+			var w = node_info[list[v.ID][i].next];
+			if (w.index == undefined) {
+				strongConnect(w);
+				v.lowlink = (v.lowlink < w.lowlink) ? v.lowlink : w.lowlink;
+			}
+			else if (inTheStack(w)) {
+				v.lowlink = (v.lowlink < w.index) ? v.lowlink : w.index;
+			}
+		}
+
+		if (v.lowlink == v.index) {
+			connected.push([]);
+			var tempLength = connected.length;
+			while (true) {
+				if (stack.length == 0)
+					break;
+				var w = stack.pop();
+				map[w.ID] = false;
+				connected[tempLength - 1].push(w);
+				if (w.ID == v.ID) {
+					break;
+				}
+			}
+		}
+
+		function inTheStack(w)
+		{
+			return map[w.ID];
+		}
+
+		return connected;
+	}
+}*/ //未修改
+
+function connectedComponent1(list, node_info, this_node) {
+
+	var need_node = {};
+	var numOfVertex = node_info.length;
+	var component_id = 0;
+
+	for (var i = 0; i < numOfVertex; ++i) {
+		node_info[i]["index"] = undefined;
+	}
+	
+	function connectC(v)
+	{
+		v.index = 1;
+		need_node[v.id] = component_id;
+		var len = list[v.id].length;
+		for (var i = 0; i < len; ++i) {
+			var w = node_info[list[v.id][i].next];
+			if (w.index == undefined) {
+				connectC(w);
+			}
+		}
+	}
+	
+	for (var i = 0; i < numOfVertex; ++i) {
+		if (node_info[i]["index"] == undefined) {
+			connectC(node_info[i]);
+			component_id ++;
+		}
+	}
+
+	return need_node;
+}
