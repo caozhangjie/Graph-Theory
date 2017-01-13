@@ -483,6 +483,18 @@ function connectedComponent1(list, node_info, this_node) {
 
 // T为迭代次数, r为分区阈值, 取T=20, r=0.5, 根据效果可以改变
 function SLPA(list, node_info, T, r) {
+	numOfNode = node_info.length;
+	for (var i = 0; i < numOfNode; ++i) {
+	    node_info[i]["memory"] = [];
+	    for (var j = 0; j < numOfNode; ++j) {
+	        if (j == i) {
+	            node_info[i]["memory"][j] = { "id": j, "times": 1 };
+	        }
+	        else {
+	            node_info[i]["memory"][j] = { "id": j, "times": 0 };
+	        }
+	    }
+	}
     for (var i = 0; i < T; ++i) {
         node_info = Listen(list, node_info);
     }
@@ -551,7 +563,7 @@ function PostProcessing(node_info, r) {
 
     var result = [];
     for (var i = 0; i < num_of_node; ++i) {
-        if (pre_result[i] != undefined) {
+        if (pre_result[i] != undefined && pre_result[i].length > 5) {
             result.push(pre_result[i]);
         }
     }
