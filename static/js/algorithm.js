@@ -563,7 +563,7 @@ function PostProcessing(node_info, r) {
 
     var result = [];
     for (var i = 0; i < num_of_node; ++i) {
-        if (pre_result[i] != undefined && pre_result[i].length > 5) {
+        if (pre_result[i] != undefined && pre_result[i].length > 1) {
             result.push(pre_result[i]);
         }
     }
