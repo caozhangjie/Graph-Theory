@@ -32,10 +32,17 @@ $^\dag$School of Software, Tsinghua University, Beijing 100084, China\\
 \maketitle
 
 \begin{abstract}
-
+Data visualization is being used more and more widely. In our project we crawl a social network based on Douban and make it visualized. We calculate the shortest path between the nodes, the minimun spanning tree, the centrality of the nodes and the connected component of the gragh. We communicate information clearly and efficiently via statistical graphics, plots and information graphics to help users analyze and reason about data. 
 \end{abstract}
 
 \section{Introduction}
+Data visualization is techniques used to communicate data or information with users by encoding it as visual objects (e.g., points, lines or bars). Nowadays, data visualization has more and more extensive application, such as urban network, social network, citation network. In the future, data visualization will create more value in the field of business management because it is more accurate, timely and intelligent. Force-directed graph drawing algorithms are a class of algorithms for drawing graphs. By positioning the nodes of a graph in two-dimensional space, all the edges are of more or less equal length and crossing edges are as few as possible, by assigning forces among the set of edges and the set of nodes, and then using these forces to minimize their energy.
+
+Our project crawls a social network from Douban Movie. Graphic algorithm is an important part of our project and in this part we calculate the shortest path between two nodes, the minimum spanning tree, the centrality of the nodes and the connected component of the graph. Besides this, data visualization is also an important part which we use to communicate information clearly and efficiently with users. Numerical data is encoded using dots and lines to visually show quantitative message, which aims to help users analyze and reason about data. Otherwise, evidenced by efficient visualization, complex data can be more accessible, understandable and usable.
+
+In this project, we optimize the realization of the fundamental algorithms (Prim algorithm, Dijkstra algorithm, Betweeness centrality and Closeness centrality) and add four new algorithms (Kruskal algorithm, Bellman-Ford algorithm, Floyd algorithm and jerry algorithm). Our data visualization which performs good user interaction is very fast and can satisfy our users? sight entertainment.
+
+In this article, Section 1 gives an overview of our project. We crawler users' information on Douban and show connections among users on webpage. Principle and implementation of Prim algorithm, Kruskal algorithm, Dijkstra algorithm, Bellman-Ford algorithm, Floyd algorithm and advanced algorithm named as jerry algorithm are mentioned in section 2. Section 3 shows results and conclusion is given in section 4. 
 
 \section{Procedure}
 \subsection{Crawler}
@@ -127,6 +134,7 @@ We use adjacency list to represent the edges in the graph and store the $memory$
 \section{Result}
   
 \section{Conclusion}
+To conclude, in our project we crawler 1000 users? information of douban and then select 60102 widely known movies and make every user as a vector of ratings to get a rating matrix where every row is the rating of one user giving to the movies. We implement all of the required basic algorithms: Prim Algorithm, Kruskal Algorithm, Dijkstra Algorithm, Ford Algorithm, Floyd Algorithm, Betweenness Centrality and Closeness Centrality. We choose to use JavaScript to implement all of the algorithm to make the data visualized. Then we calculate the Euclidean distance of every two rows and normalizes all the distance to 0 to 1. Then we use 1 to substract the normalized distance as the similarity of two users. This similarity is also the metric of edge.And our data visualization which has good user interaction is very fast and can satisfy our users? sight entertenment.
 
 %\begin{figure}[h]
 %  \centering
