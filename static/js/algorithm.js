@@ -14,9 +14,12 @@ function DijkstraAlgorithm(list, start, end)
 
 	used[now] = true;
 	while (now != end) {
+		console.log(now);
 		var numOfSuccessor = list[now].length;
 		for(var i = 0; i < numOfSuccessor; ++i) {
-			queue.addNode({"value":list[now][i].value + path[now].value, "ID":list[now][i].ID, "IDOfLink":list[now][i].IDOfLink, "next":list[now][i].next});			
+			if(!used[list[now][i].next]){
+				queue.addNode({"value":list[now][i].value + path[now].value, "ID":list[now][i].ID, "IDOfLink":list[now][i].IDOfLink, "next":list[now][i].next});
+			}			
 		}
 		if (queue.isEmpty()) {
 			break;
@@ -222,8 +225,35 @@ function FordAlgorithm(list, start){
 			}
 		}
 	}
-	console.log(pre);
 	return pre;
+}
+
+function FlowAlgorithm(list, start){
+	var len_of_list = Object.keys(list).length;
+	var pre = [];
+	var path_len = [];
+	var new_expand_node = [];
+	for (var i = 0; i < len_of_list; ++i){
+		pre[i] = 100000;
+		path_len[i] = 100000;
+	}
+	pre[start] = -1;
+	path_len[start] = 0;
+	new_expand_node = [start];
+	var cur_node;
+	var len_of_current_next;
+	while(new_expand_node.length > 0){
+		cur_node = new_expand_node.shift();
+		len_of_current_next = list[cur_node].length;
+		for (var i = 0; i < len_of_current_next; ++i){
+			if (path_len[list[cur_node][i].next] > path_len[cur_node] + list[cur_node][i].value){
+				path_len[list[cur_node][i].next] = path_len[cur_node] + list[cur_node][i].value;
+				pre[list[cur_node][i].next] = cur_node;
+				new_expand_node.push(list[cur_node][i].next);
+			}
+		}
+	}
+	return [pre, path_len];
 }
 
 /*function KruskalMST(links, node_info)
@@ -386,68 +416,6 @@ function pointBetweeness1(list, node_info)
 	return betweeness;
 }
 
-/*function strongConnectedComponent(list, node_info)
-{
-	var index = 0;
-	var connected = [];
-	var stack = [];
-	var map = [];
-	var numOfVertex = node_info.length;
-	for (var i = 0; i < numOfVertex; ++i) {
-		node_info[i]["index"] = undefined;
-		node_info[i]["lowlink"] = undefined;
-		map[i] = false;
-	}
-	for (var i = 0; i < numOfVertex; ++i) {
-		if (node_info[i]["index"] == undefined) {
-			strongConnect(node_info[i]);
-		}
-	}
-
-	function strongConnect(v)
-	{
-		v.index = index;
-		v.lowlink = index;
-		++index;
-		stack.push(v);
-		map[v.ID] = true;
-
-		var len = list[v.ID].length;
-		for (var i = 0; i < len; ++i) {
-			var w = node_info[list[v.ID][i].next];
-			if (w.index == undefined) {
-				strongConnect(w);
-				v.lowlink = (v.lowlink < w.lowlink) ? v.lowlink : w.lowlink;
-			}
-			else if (inTheStack(w)) {
-				v.lowlink = (v.lowlink < w.index) ? v.lowlink : w.index;
-			}
-		}
-
-		if (v.lowlink == v.index) {
-			connected.push([]);
-			var tempLength = connected.length;
-			while (true) {
-				if (stack.length == 0)
-					break;
-				var w = stack.pop();
-				map[w.ID] = false;
-				connected[tempLength - 1].push(w);
-				if (w.ID == v.ID) {
-					break;
-				}
-			}
-		}
-
-		function inTheStack(w)
-		{
-			return map[w.ID];
-		}
-
-		return connected;
-	}
-}*/ //未修改
-
 function connectedComponent1(list, node_info, this_node) {
 
 	var need_node = {};
@@ -477,7 +445,6 @@ function connectedComponent1(list, node_info, this_node) {
 			component_id ++;
 		}
 	}
-
 	return need_node;
 }
 
