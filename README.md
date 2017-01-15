@@ -21,3 +21,6 @@ algorithm selection: select algorithm
 draw button: select or draw the algorithm as described in the "Result" section of the document
 
 clear button: clear the previous algorithm's effect
+
+
+Warning: Open your Cross-Origin Permission if you want to run the html!
