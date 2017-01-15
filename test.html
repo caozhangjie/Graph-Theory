@@ -186,6 +186,7 @@ function changeScale(){
 }
 
 function changeThreshold(){
+  ClearCanvas();
   var intPart = $("#weightSliderInt").slider("value");
   var floatPart = $("#weightSliderFloat").slider("value");
 
@@ -214,7 +215,6 @@ function changeThreshold(){
     .on("tick", tick)//指时间间隔，隔一段时间刷新一次画面
     .start();//开始转换
 
-
   edges_line = svg.selectAll(".edgepath")
     .data(linksAftetThreshold)
     .enter()
@@ -226,6 +226,44 @@ function changeThreshold(){
     .style("stroke", "#bf8639")
     .style("pointer-events", "none")
     .style("stroke-width",0.5)//线条粗细
+
+
+  svg.selectAll("circle").remove();
+  circle = svg.append("g").selectAll("circle")
+    .data(force.nodes())//表示使用force.nodes数据
+    .enter().append("circle")
+    .attr("id", function(d, i){
+      return "node" + i;
+    })
+    .style("fill","#B43232")
+    .style('stroke',"#B43232")
+    .attr("r", 5)//设置圆圈半径
+    .on("click",function(node){
+        //记录当前被点中的点的信息
+        clickedNode = node;
+        //单击时让连接线加粗
+        edges_line.style("stroke-width",function(line){
+            if(line.source.name==node.name || line.target.name==node.name){
+                return 4;
+            }else{
+                return 0.5;
+            }
+        });
+
+        var html = "";
+        html = getClickedNodeInfo(node);
+        $('#node_info').html(html);
+    })
+    .call(force.drag);//将当前选中的元素传到drag函数中，使顶点可以被拖动
+  //圆圈的提示文字
+  circle.append("svg:title")  
+        .text(function(node) { 
+            var link=links[node.index];
+            if(node.name==link.source.name){
+                return "双击可查看详情"
+            }
+         });  
+
 }
 
 function draw(){

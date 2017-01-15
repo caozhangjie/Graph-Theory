@@ -637,6 +637,9 @@ function NetworkComposite(N1, N2, iter_num){
 		if (max_digree1 > max_digree2){
 			max_digree = max_digree2;
 		}
+		else{
+			max_digree = max_digree1;
+		}
 		for (var j = Math.round(Math.log(max_digree)); j > 0; --j){
 			for (var k = 0; k < node_num; k++){
 				for(var m = 0; m < node_num; m++){
@@ -649,6 +652,7 @@ function NetworkComposite(N1, N2, iter_num){
 					}
 				}
 			}
+			console.log(similarity_witness);
 			var max_witness = 0;
 			var max_k, max_m;
 			for(var k = 0; k < node_num; ++k){
