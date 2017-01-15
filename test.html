@@ -92,6 +92,7 @@ var node_info_pos;
 var screenw = document.documentElement.clientWidth || document.body.clientWidth;
 var screenh = document.documentElement.clientHeight || document.body.clientHeight;
 var scrollleft, scrolltop;
+var temppath;
 
 
 function tick() {
@@ -103,17 +104,34 @@ function tick() {
       return path;
   });  
     
-  /*edges_text.attr('transform',function(d,i){
-        if (d.target.x<d.source.x){
-            bbox = this.getBBox();
-            rx = bbox.x+bbox.width/2;
-            ry = bbox.y+bbox.height/2;
-            return 'rotate(180 '+rx+' '+ry+')';
-        }
-        else {
-            return 'rotate(0)';
-        }
-   });*/
+  if (temppath.length > 0){
+    temppath.attr(
+    'd', function(pathNodes, i) {
+    var pathd = '';
+
+    if (pathNodes.length > 0){
+      console.log(pathNodes);
+      pathNodes.reverse();
+      console.log(pathNodes);
+
+      pathd += 'M ';
+      pathd += nodes[pathNodes[0]].x + ' ';
+      pathd += nodes[pathNodes[0]].y + ' ';
+
+      for (var k = 1; k < pathNodes.length - 1; k++){
+        pathd += 'L ';
+        pathd += nodes[pathNodes[k]].x + ' ';
+        pathd += nodes[pathNodes[k]].y + ' ';
+      }
+
+      pathd += 'L ';
+      pathd += nodes[pathNodes[pathNodes.length - 1]].x + ' ';
+      pathd += nodes[pathNodes[pathNodes.length - 1]].y;
+
+    }
+    return pathd;
+    });
+  }
 }
 
 //设置连接线的坐标,使用椭圆弧路径段双向编码
@@ -458,59 +476,137 @@ function draw(){
       break;
     case "Flow":
       var flow = FlowAlgorithm(list, clickedNode.name);
-      console.log(flow);
       var start_node = clickedNode.name;
       var all_path = [];
       for (var i = 0; i < node_info.length; i++){
+        all_path.push([]);
         if(i == start_node){
-          all_path.push(-1);
-          continue;
+          all_path[i].push(start_node);
         }
-        if (flow[0][i] > 10000){
-          all_path.push(-2);
-          continue;
-        }
-        if(flow[0][i] != -1){
-          all_path.push(flow[0][i]);
-        }
-      }
-      console.log(all_path);
-      var all_links = {};
-      for(var i = 0; i < links.length; ++i){
-        all_links[i] = -1;
-      }
-      for(var i = 0; i < node_info.length; i++){
-        var len_of_node = list[i].length;
-        if(all_path[i] != -1){
-          if (all_path[i] == -2){
-            continue;
-          }
-          for(var j = 0; j < len_of_node; ++j){
-            if (all_path[i] != list[i][j].next){
-              all_links[list[i][j].IDOfLink] = flow[1][i];
-            }
-          }
+        else if (flow[0][i] > 10000){
         }
         else{
-          for(var j = 0; j < len_of_node; ++j){
-            all_links[list[i][j].IDOfLink] = flow[1][i];
+          var temp_node = i;
+          while(flow[0][temp_node] != -1){
+            all_path[i].push(temp_node);
+            temp_node = flow[0][temp_node];
           }
+          all_path[i].push(temp_node);
         }
       }
-      console.log(all_links);
-      edges.forEach(function(line){
-        if(all_links[line.id] != -1){
-          svg.select("#edgepath"+line.id)
-          //.style("stroke-width", 5)
-          //.style("stroke", "#bf8639")
-          .transition()
-          .delay(all_links[line.id] * 200)
-          .style("stroke", "url(#forwardGradient"+line.id)
-          //.transition(micro_second)
-          //.style("stroke-width", 0.5)
-          //.style("stroke", "#bf8639")
-        }
-      });
+
+      svg.selectAll(".temppath").remove();
+      temppath =
+          svg.selectAll(".temppath")
+          .data(all_path)
+          .enter()
+          .append("path")
+          .attr({
+            'd': function(pathNodes, i) {
+              var pathd = '';
+
+              if (pathNodes.length > 0){
+                console.log(pathNodes);
+                pathNodes.reverse();
+                console.log(pathNodes);
+
+                pathd += 'M ';
+                pathd += nodes[pathNodes[0]].x + ' ';
+                pathd += nodes[pathNodes[0]].y + ' ';
+
+                for (var k = 1; k < pathNodes.length - 1; k++){
+                  pathd += 'L ';
+                  pathd += nodes[pathNodes[k]].x + ' ';
+                  pathd += nodes[pathNodes[k]].y + ' ';
+                }
+
+                pathd += 'L ';
+                pathd += nodes[pathNodes[pathNodes.length - 1]].x + ' ';
+                pathd += nodes[pathNodes[pathNodes.length - 1]].y;
+
+              }
+              return pathd;
+            },
+            'class':'temppath',
+            'id': function(d, i){return 'temppath'+i;}
+          })
+          .style("stroke", function(d, i){
+            if (all_path[i].length > 0){
+              if (nodes[all_path[i][0]].x < nodes[all_path[i][all_path[i].length - 1]].x){
+                return "url(#forwardGradient)"
+              }
+              else {
+                return "url(#backGradient)"
+              }
+            }
+          })
+          .style("stroke-width", 2)
+          .style("fill", "none");
+
+      svg.selectAll("circle").remove();
+      //圆圈
+    circle = svg.append("g").selectAll("circle")
+      .data(force.nodes())//表示使用force.nodes数据
+      .enter().append("circle")
+      .attr("id", function(d, i){
+        return "node" + i;
+      })
+      .style("fill","#B43232")
+      .style('stroke',"#B43232")
+      .attr("r", 5)
+      .on("click",function(node){
+        //记录当前被点中的点的信息
+        clickedNode = node;
+        //单击时让连接线加粗
+        edges_line
+          .style("stroke",function(line){
+            if(line.source.name==node.name || line.target.name==node.name){
+              if (line.source.x > node.x || line.target.x > node.x){
+                return "url(#forwardGradient)";
+              }
+              else{
+                return "url(#backGradient)";
+              }
+            }else{
+                return "#bf8639";
+            }
+          })
+          .style("stroke-width",function(line){
+            /*if(line.source.name==node.name || line.target.name==node.name){
+                return 4;
+            }else{
+                return 0.5;
+            }*/
+            return 0.5;
+          });
+
+        var html = "";
+        html = getClickedNodeInfo(node);
+        $('#node_info').html(html);
+      })
+      .call(force.drag);//将当前选中的元素传到drag函数中，使顶点可以被拖动
+  //圆圈的提示文字
+  circle.append("svg:title")  
+        .text(function(node) { 
+            var link=links[node.index];
+            if(node.name==link.source.name){
+                return "双击可查看详情"
+            }
+         });  
+
+
+
+       /* svg.selectAll(".temppath")
+          .enter()
+          .append("path")
+          .attr({
+            'd': function() {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+            'class':'temppath',
+            'id': 'temppath'+i
+          })
+          .style("stroke", "#bf8639")
+          .style("pointer-events", "none")
+          .style("stroke-width",0.5);//线条粗细*/
       break;
   }
 }
@@ -808,10 +904,11 @@ svg = d3.select("body").append("svg")
     .attr("top", "0px")
     .attr("position", "absolute");
 
+temppath = svg.selectAll(".temppath");
   ///////////////////////////////////////////////////////////////////////////
   ///////////// Create the gradient for the forward movement ////////////////
   ///////////////////////////////////////////////////////////////////////////
-  var forwardGradient_list = [];
+/*  var forwardGradient_list = [];
   var defs;
   var temp_gradient;
   /*defs = svg.append("g").append("defs");
@@ -845,7 +942,8 @@ svg = d3.select("body").append("svg")
       .attr("attributeName","x2")
       .attr("values","100%;200%")
       .attr("dur","7s")
-      .attr("repeatCount", "indefinite");*/
+      .attr("repeatCount", "indefinite");
+
   for (var j = 0; j < links.length; ++j){
     defs = svg.append("g").append("defs");
     temp_gradient = defs.append("linearGradient")
@@ -881,7 +979,78 @@ svg = d3.select("body").append("svg")
     forwardGradient_list.push(temp_gradient);
   }
   var micro_second = d3.transition()
-    .duration(1);
+    .duration(1);*/
+
+  var forwardGradient_list = [];
+  var defs;
+  var temp_gradient, backGradient;
+  defs = svg.append("g").append("defs");
+
+  var backGradient = defs.append("linearGradient")
+    //.attr("gradientUnits", "userSpaceOnUse")
+    .attr("id","backGradient")
+    .attr("x1","0%")
+    .attr("y1","3%")
+    .attr("x2","20%")
+    .attr("y2","0%")
+    .attr("spreadMethod", "reflect");
+    
+  backGradient.selectAll(".stop")
+    .data([                             
+            {offset: 0, color: "#bf8639"},                          
+            {offset: 0.8, color: "#debd91"},      
+            {offset: 0.9, color: "#debd91"},        
+            {offset: 1.0, color: "#bf8639"}   
+    ])                  
+    .enter().append("stop")
+    .attr("offset", function(d,i) { return d.offset; })   
+    .attr("stop-color", function(d) { return d.color; });
+
+  backGradient.append("animate")
+    .attr("attributeName","x1")
+    .attr("values","0%;-200%")
+    .attr("dur","10s")
+    .attr("repeatCount","indefinite");
+
+  backGradient.append("animate")
+    .attr("attributeName","x2")
+    .attr("values","100%;0%")
+    .attr("dur","10s")
+    .attr("repeatCount","indefinite");
+
+
+  temp_gradient = defs.append("linearGradient")
+    //.attr("gradientUnits", "userSpaceOnUse")
+      .attr("id","forwardGradient")
+      .attr("x1","0%")
+      .attr("y1","0%")
+      .attr("x2","100%")
+      .attr("y2","0")
+      .attr("spreadMethod", "reflect");
+
+  temp_gradient.selectAll(".stop")
+      .data([  
+            {offset: 0, color: "#bf8639"},                          
+            {offset: 0.1, color: "#debd91"},      
+            {offset: 0.2, color: "#debd91"},        
+            {offset: 1.0, color: "#bf8639"}     
+      ])                  
+      .enter().append("stop")
+      .attr("offset", function(d,i) { return d.offset; })   
+      .attr("stop-color", function(d) { return d.color; });
+
+  temp_gradient.append("animate")
+      .attr("attributeName","x1")
+      .attr("values","-10%;100%")
+      .attr("dur", "10s")
+      .attr("repeatCount","indefinite");
+
+  temp_gradient.append("animate")
+      .attr("attributeName","x2")
+      .attr("values","100%;700%")
+      .attr("dur","10s")
+      .attr("repeatCount", "indefinite");
+
 
 //设置连接线    
 edges_line = svg.selectAll(".edgepath")
@@ -926,20 +1095,6 @@ circle = svg.append("g").selectAll("circle")
     .style("fill","#B43232")
     .style('stroke',"#B43232")
     .attr("r", 5)//设置圆圈半径
-    .on("mouseover", function(node){
-
-        edges_line.style("stroke-width",function(line){
-            if(line.source.name==node.name || line.target.name==node.name){
-                return 4;
-            }else{
-                return 0.5;
-            }
-        });
-
-        var html = "";
-        html = getClickedNodeInfo(node);
-        $('#node_info').html(html);
-    })
     .on("click",function(node){
         //记录当前被点中的点的信息
         clickedNode = node;

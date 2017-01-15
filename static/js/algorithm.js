@@ -550,3 +550,141 @@ function Process(memory, r) {
         }
     }
 }
+
+function testNetworkComposite(list){
+	var N1 = {};
+	var N2 = {};
+	var len1, len2;
+	for(var i = 0; i < Object.keys(list).length; ++i){
+		N1[i] = [];
+		N2[i] = [];
+	}
+	for(var i = 0; i < Object.keys(list).length; ++i){
+		len1 = Math.round(list[i].length / 2);
+		len2 = list[i].length - len1;
+		for (var j = 0; j < list[i].length; ++j){
+			if (Math.random() > 0.5){
+				N1[i].push(list[i][j].next);
+				N1[list[i][j].next].push(i);
+			}
+			else{
+				N2[i].push(list[i][j].next);
+				N2[list[i][j].next].push(i);
+			}
+		}
+	}
+	composite_net = NetworkComposite(N1, N2, 10);
+	var edge_raw = composite_net[1];
+	composite_net = composite_net[0];
+	var num_match = 0;
+	var all_edge = 0;
+	var edge_num = 0;
+	for (var i = 0; i < Object.keys(list).length; ++i){
+		edge_num += composite_net[i].length;
+		for(var j = 0; j < list[i].length; ++j){
+			all_edge += 1;
+			for(var k = 0; k < composite_net[i].length; ++k){
+				if(composite_net[i][k] == list[i][j].next){
+					num_match += 1;
+				}
+			}
+		}
+	}
+	console.log(edge_raw);
+	console.log(edge_num);
+	console.log(all_edge);
+	console.log(parseFloat(edge_raw) / all_edge);
+	console.log(parseFloat(num_match) / all_edge);
+
+}
+
+function NetworkComposite(N1, N2, iter_num){
+	var edge_raw = 0;
+	var max_digree;
+	var max_digree1, max_digree2;
+	var composite_network = {};
+	var similarity_witness = [];
+	var node_num = Object.keys(N1).length;
+	for (var i = 0; i < node_num; ++i){
+		composite_network[i] = [];
+		for(var j = 0; j < N1[i].length; ++j){
+			for(var k = 0; k < N2[i].length; ++k){
+				if(N1[i][j] == N2[i][k]){
+					composite_network[i].push(N1[i][j]);
+					edge_raw += 1;
+					break;
+				}
+			}
+		}
+		similarity_witness.push([])
+		for (var j = 0; j < node_num; ++j){
+			similarity_witness[i].push(0);
+		}
+	}
+	for (var i = 0; i < iter_num; ++i){
+		max_digree1 = N1[0].length;
+		max_digree2 = N2[0].length;
+		for (var j = 0; j < node_num; ++j){
+			if(max_digree1 < N1[j].length){
+				max_digree1 = N1[j].length;
+			}
+		}
+		for (var j = 0; j < node_num; ++j){
+			if(max_digree2 < N2[j].length){
+				max_digree2 = N2[j].length;
+			}
+		}
+		if (max_digree1 > max_digree2){
+			max_digree = max_digree2;
+		}
+		for (var j = Math.round(Math.log(max_digree)); j > 0; --j){
+			for (var k = 0; k < node_num; k++){
+				for(var m = 0; m < node_num; m++){
+					for (var n = 0; n < N1[k].length; n++){
+						for (var q = 0; q < N2[m].length; q++){
+							if(N1[k][n] == N2[m][q] || InList(N1, n, q)){
+								similarity_witness[k][m] += 1;
+							}
+						}
+					}
+				}
+			}
+			var max_witness = 0;
+			var max_k, max_m;
+			for(var k = 0; k < node_num; ++k){
+				for (var m = 0; m < node_num; ++m){
+					if (max_witness < similarity_witness[k][m]){
+						max_witness = similarity_witness[k][m]
+						max_m = m;
+						max_k = k;
+					}
+					similarity_witness[k][m] = 0;
+				}
+			}
+			if(N1[max_k].length>= Math.pow(2, j) && N2[max_m].length >= Math.pow(2, j) && max_witness > 1){
+				var flag = true;
+				for (var k = 0; k < N1[max_k].length; k++){
+					if(max_m == composite_network[max_k][k]){
+						flag = false;
+						break;
+					}
+				}
+				if(flag){
+					composite_network[max_k].push(max_m);
+					composite_network[max_m].push(max_k);
+				}
+			}
+		}
+		console.log(composite_network);
+	}
+	return [composite_network, edge_raw];
+}
+
+function InList(N1, n, q){
+	for (var i = 0; i < N1[n].length; ++i){
+		if (N1[n][i].next == q){
+			return true;
+		}
+	}
+	return false;
+}

@@ -19,7 +19,11 @@
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{float}
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage{algorithm} 
+\usepackage{algorithmicx} 
+\usepackage{algpseudocode}  
+\usepackage{verbatimbox}
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 \title{Graph Theory Project}
 \author{
@@ -145,7 +149,33 @@ Noted that in our opinion, a single node can't be a community so we delete it.\\
 We use adjacency list to represent the edges in the graph and store the $memory$ information in the node structure. Then we use a receiveList to choose the most popular node from the $Speaker$. Finally, we use a two-dimension array to store all of the communities.
 \subsubsection{Information Flow}
 In real life, the social network consists of nodes(users) and edges(relation) is always analysed to extract useful information form the network data. We select the event flow in real life and we want to mimic this process on the graph. We select one point as a start point and an event appears on this vertex, and simulate how the news of event will flow through the social network. This analysis finds the hidden structure of the social network and from the simulation, we can find some important vertices in the graph will block the information flow. Some vertices are transition vertices and these vertices receive much information from multiple vertices and send information to many vertices. If this vertex has some problems, the flow will be cut down. Based on these analyses, when events break up, the government or the corresponding authorization can control the flow immediately.\\
-The function can be triggered, 
+We simulate this select one vertex as the source node and let it send flow to near nodes. Then once the near nodes receives the flow, they sent the flow to nodes except the original one. So the flowing path is like a tree and every child node receives the flow in the order of their hierarchy. \\
+\subsubsection{Reconciliation Network Algorithm}
+As people participate more and more in the Internet activity, they are in many social platform, like LinkIn, Facebook abroad and WeChat, QQ in China. We act as a different character in different social groups. For example, in Facebook, we are usually communicate with relatives and friends and act as a relative or friend while in LinkIn, we meet colleagues and act as a work contact. But when we want to construct the ego-network of an individual in the social network, we need all the links associated with this node in the underlying network which contains all the relation of every one. But in reality, we only have some subsets of this underlying network, such as the home part, the work part. Thus, how to reconstruct the underlying network from these sub-networks becomes a important problem, which is called reconciliation algorithm.\\
+In this project, we implemented a fast reconciliation algorithm proposed by Google \cite{cite:efficient}. The algorithm import a concept called similarity witness, which is defined as follows: \\
+$A\ pair\ of\ ndoes\ (u_1, u_2)\ with\ u_1\in G_1,u_2\in G_2\ is\ said\ to\ be\ a\ similarity\ witness\ for\ a\ pair\ (v_1, v_2)\ with\ v_1\in G_1,v_2\in G_2, if\ u_1\in N_1(v_1),u_2\in N_2(v_2)\ and\ u_1\ has\ been\ linked\ to / identified\ with\ u_2$.\\
+Thus, if two nodes $u_1\ and\ u_2$ have many similarity witnesses, we can decide that they are linked since they may not be linked in both networks but is linked by through some other links in both networks. \\
+Then, the algorithm is that \\
+\begin{algorithm}[htb]  
+  \caption{Fast Reconciliation Algorithm}  
+  \label{alg:fra}  
+  \textbf{Input}:\\
+  $G_1(V,E_1),G_2(V,E_2)$, $L$ is a set of initial identification links across the networks, $D$ is the maximum degree in the graph and T is a minimum matching score and k is the number of iterations.
+  \textbf{Output}:\\
+  A larger set of identification links across the networks.
+  \textbf{Algorithm}: \\
+For $i = 1,...,k$\\
+\ \ For $j = log D,...,1$\\
+\ \ \ \ For all the pairs $(u,v)$ with $u\in G_1$ and $v\in G_2$\\
+\ \ \ \ and such that $d_{G_1}\le 2^j$ and $d_{G_2}\le 2^j$\\
+\ \ \ \ \ \ Assign to $(u,v)$ a score equal to the number\\
+\ \ \ \ \ \ of similarity witness between $u$ and $v$\\
+\ \ \ \ If $(u,v)$ is the pair with highest score in which\\
+\ \ \ \ either $u$ or $v$ appear and the score is above T\\
+\ \ \ \ add $(u,v)$ to $L$.\\
+Output $L$\\
+\end{algorithm}
+In experiment, this algorithm can runs very fast and only need few iterations to coverage, however, as the we have only one network, we test this algorithm by first dividing the original network into two parts and then use this algorithm to composite them into one network. We use the reconstruction rate of the original network as our criterion.\\
 \section{Result}
 \subsection{Minimum Spanning Tree}
 \begin{figure*}[htb]
@@ -224,6 +254,17 @@ To run centrality algorithm, just select the algorithm your want to use (Closene
 \end{figure}
 To run SLAP algorithm, just select the SLAP. Then click draw button. From Figure~\ref{fig:slap}, we can see the result of running SLAP. The nodes in the same color is in the same community. \\ 
 
+\subsection{Information Flow}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\columnwidth]{if.png}
+  \caption{Information Flow.}
+  \label{fig:if}
+\end{figure}
+To run the information flow, just select information flow. Then click draw button. From Figure~\ref{fig:if}, we can see the result of information flow. The write light is the information flow. \\
+
+\subsection{Reconciliation Network Algorithm}
+This result cannot be visualized since we test this algorithm with reconstruction rate. We tune parameters and get the final reconstruction rate result as .
  
 \section{Conclusion}
 In this project, we crawler 1000 users' information of douban and then estimate their similarity based on their ratings on 60102 widely known movies. We implement all of the required basic algorithms, including Minimum Spanning Tree Algorithm (Prim Algorithm, Kruskal Algorithm), Shortest Path Algorithm (Dijkstra Algorithm, Ford Algorithm, Floyd Algorithm) Betweenness Centrality and Closeness Centrality. We visualize our users relation and algorithms with D3 framework and support good user interaction. From the graph, we make some conclusions that some very important person, which means the user watch many movies and have common taste is the bond of many users. He is the center of the neighboorhood. We also see that some small groups are far from the big group, meaning that they have special taste of movies and can form small groups with people with similar interest.
