@@ -405,10 +405,20 @@ function draw(){
       connectedComponent = connectedComponent1(list, node_info, clickedNode);
       circle
         .style("fill", function(d){
-          return color_list[connectedComponent[d.name]];
+          if (connectedComponent[d.name] < 13){
+            return color_list[connectedComponent[d.name]];
+          }
+          else{
+            return color_list[12];
+          }
         })
         .style("stroke", function(d){
-          return color_list[connectedComponent[d.name]];
+          if (connectedComponent[d.name] < 13){
+            return color_list[connectedComponent[d.name]];
+          }
+          else{
+            return color_list[12];
+          }
         });
         break;
     case "Floyd":
@@ -488,15 +498,17 @@ function draw(){
         }
       }
       console.log(all_links);
-
       edges.forEach(function(line){
         if(all_links[line.id] != -1){
           svg.select("#edgepath"+line.id)
+          //.style("stroke-width", 5)
+          //.style("stroke", "#bf8639")
           .transition()
-          .delay(Math.round(all_links[line.id]*200))
-          .style("stroke", "url(#temp_gradient")
-          .style("stroke-width", 5);
-          //.remove();
+          .delay(all_links[line.id] * 200)
+          .style("stroke", "url(#forwardGradient"+line.id)
+          //.transition(micro_second)
+          //.style("stroke-width", 0.5)
+          //.style("stroke", "#bf8639")
         }
       });
       break;
@@ -802,11 +814,11 @@ svg = d3.select("body").append("svg")
   var forwardGradient_list = [];
   var defs;
   var temp_gradient;
-  for (var i = 0; i < links.length; ++i){
-    defs = svg.append("g").append("defs");
+  /*defs = svg.append("g").append("defs");
     temp_gradient = defs.append("linearGradient")
+      .attr("id", "temp_gradient")
     //.attr("gradientUnits", "userSpaceOnUse")
-      .attr("id","forwardGradient")
+      //.attr("id","forwardGradient")
       .attr("x1","0%")
       .attr("y1","0%")
       .attr("x2","100%")
@@ -815,9 +827,8 @@ svg = d3.select("body").append("svg")
 
     temp_gradient.selectAll(".stop")
       .data([   
-            {offset: 0, color: "#bf8639"},                          
-            {offset: 0.475, color: "#debd91"},      
-            {offset: 0.525, color: "#debd91"},        
+            {offset: 0, color: "#bf8639"},                               
+            {offset: 0.5, color: "#ffffff"},        
             {offset: 1.0, color: "#bf8639"}     
       ])                  
       .enter().append("stop")
@@ -827,16 +838,50 @@ svg = d3.select("body").append("svg")
     temp_gradient.append("animate")
       .attr("attributeName","x1")
       .attr("values","0%;100%")
-      .attr("dur", "10s")
+      .attr("dur", "7s")
       .attr("repeatCount","indefinite");
 
     temp_gradient.append("animate")
       .attr("attributeName","x2")
-      .attr("values","100%;300%")
-      .attr("dur","10s")
-      .attr("repeatCount", "indefinite");
+      .attr("values","100%;200%")
+      .attr("dur","7s")
+      .attr("repeatCount", "indefinite");*/
+  for (var j = 0; j < links.length; ++j){
+    defs = svg.append("g").append("defs");
+    temp_gradient = defs.append("linearGradient")
+    //.attr("gradientUnits", "userSpaceOnUse")
+      .attr("id","forwardGradient"+j)
+      .attr("x1","0%")
+      .attr("y1","0%")
+      .attr("x2","100%")
+      .attr("y2","0")
+      .attr("spreadMethod", "reflect");
+
+    temp_gradient.selectAll(".stop")
+      .data([   
+            {offset: 0, color: "#bf8639"},                          
+            {offset: 0.5, color: "#ffffff"},       
+            {offset: 1.0, color: "#bf8639"}     
+      ])                  
+      .enter().append("stop")
+      .attr("offset", function(d,i) { return d.offset; })   
+      .attr("stop-color", function(d) { return d.color; });
+
+    temp_gradient.append("animate")
+      .attr("attributeName","x1")
+      .attr("values","0%;100%")
+      .attr("dur", (links[j].value * 200) + "ms")
+      .attr("repeatCount","1");
+
+    temp_gradient.append("animate")
+      .attr("attributeName","x2")
+      .attr("values","100%;200%")
+      .attr("dur", (links[j].value * 200) + "ms")
+      .attr("repeatCount", "1");
     forwardGradient_list.push(temp_gradient);
   }
+  var micro_second = d3.transition()
+    .duration(1);
 
 //设置连接线    
 edges_line = svg.selectAll(".edgepath")
