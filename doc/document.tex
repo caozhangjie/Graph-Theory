@@ -178,7 +178,7 @@ Output $L$\\
 In experiment, this algorithm can runs very fast and only need few iterations to coverage, however, as the we have only one network, we test this algorithm by first dividing the original network into two parts and then use this algorithm to composite them into one network. We use the reconstruction rate of the original network as our criterion.\\
 \section{Result}
 \subsection{Minimum Spanning Tree}
-\begin{figure*}[htb]
+\begin{figure}[H]
 \centering
 \subfigure[Prim Algorithm.]{
   \includegraphics[width=0.8\columnwidth]{prim.png}
@@ -190,31 +190,31 @@ In experiment, this algorithm can runs very fast and only need few iterations to
   }
    \caption{Minimum Spanning Tree.}
    \label{fig:minimum spanning tree}
-\end{figure*}
+\end{figure}
 To run minimum spanning tree algorithm, just select the algorithm your want to use (Prim or Kruskal). Then click the node you want to choose and click draw. The spanning tree is the bold edge tree. From Figure~\ref{fig:minimum spanning tree}, we can see the result of running minimum spanning tree.\\
 
 \subsection{Shortest Path}
-\begin{figure*}[htb]
+\begin{figure}[H]
 \centering
 \subfigure[Floyd Algorithm.]{
-  \includegraphics[width=0.8\columnwidth]{floyd.png}
+  \includegraphics[width=0.65\columnwidth]{floyd.png}
   \label{fig:floyd}
   }
   \subfigure[Ford Algorithm.]{
-  \includegraphics[width=0.8\columnwidth]{ford.png}
+  \includegraphics[width=0.65\columnwidth]{ford.png}
   \label{fig:ford}
   }
   \subfigure[Ford Algorithm.]{
-  \includegraphics[width=0.8\columnwidth]{dijkstra.png}
+  \includegraphics[width=0.65\columnwidth]{dijkstra.png}
   \label{fig:dijkstra}
   }
    \caption{Shortest Path.}
     \label{fig:shortest path}
-\end{figure*}
+\end{figure}
 To run shortest path algorithm, just select the algorithm your want to use (Floyd or Ford or Dijkstra). Then click draw button. Then select the start node name (after "from" label) and end node name (after "to" label). Then click goto button. From Figure~\ref{fig:shortest path}, we can see the result of running shortest path.\\ 
  
  \subsection{Connected Component}
-\begin{figure*}[htb]
+\begin{figure}[H]
 \centering
 \subfigure[Origin.]{
   \includegraphics[width=0.8\columnwidth]{component1.png}
@@ -226,11 +226,11 @@ To run shortest path algorithm, just select the algorithm your want to use (Floy
   }
    \caption{Connected Component.}
     \label{fig:connected component}
-\end{figure*}
+\end{figure}
 To run connected component, just select the Connected Component and click draw. If you want to filter some edges, you can move the grey tool bar. From Figure~\ref{fig:connected component}, we can see the result of running connected component. We can see that the same component is in the same color. And after filtering, the number of components increases. Then if there are too many single nodes, we assign the rest of single nodes the purple color.\\ 
 
 \subsection{Centrality}
-\begin{figure*}[htb]
+\begin{figure}[H]
 \centering
 \subfigure[Closeness Centrality.]{
   \includegraphics[width=0.8\columnwidth]{closeness.png}
@@ -242,22 +242,22 @@ To run connected component, just select the Connected Component and click draw. 
   }
    \caption{Centrality.}
     \label{fig:centrality}
-\end{figure*}
+\end{figure}
 To run centrality algorithm, just select the algorithm your want to use (Closeness or Betweenness). Then click draw button. From Figure~\ref{fig:centrality}, we can see the result of running centrality. We can see that the redder the node, the smaller the value and the greener the node, the larger the value. To have better visual effects, we calculate the square root of the value. Thus the red node is more important in closeness and less important in betweenness. The green node is less important in closeness and more important in betweenness.\\ 
 
 \subsection{SLAP}
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\columnwidth]{slap.png}
+  \includegraphics[width=0.75\columnwidth]{slap.png}
   \caption{SLAP.}
   \label{fig:slap}
 \end{figure}
 To run SLAP algorithm, just select the SLAP. Then click draw button. From Figure~\ref{fig:slap}, we can see the result of running SLAP. The nodes in the same color is in the same community. \\ 
 
 \subsection{Information Flow}
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\columnwidth]{if.png}
+  \includegraphics[width=0.75\columnwidth]{if.png}
   \caption{Information Flow.}
   \label{fig:if}
 \end{figure}
