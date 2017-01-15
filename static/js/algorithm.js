@@ -256,32 +256,6 @@ function FlowAlgorithm(list, start){
 	return [pre, path_len];
 }
 
-/*function KruskalMST(links, node_info)
-{
-	var have_node = {};
-	var edge = [];
-	var tree_id = 0;
-	for (val in links){
-		if (have_node[val.source.name] == undefined && have_node[val.target.name] == undefined){
-			have_node[val.source.name] = tree_id;
-			have_node[val.target.name] = tree_id;
-			tree_id ++;
-			edge.push([val.IDOfLink]);
-		}
-		else if (have_node[val.source.name] == undefined || have_node[val.target.name] == undefined){
-			if (have_node[val.source.name] == undefined){
-				have_node[val.source.name] = have_node[val.target.name];
-				edge[have_node[val.source.name]].push([val.IDOfLink]);
-			}
-			else{
-				have_node[val.target.name] = have_node[val.source.name];
-				edge[have_node[val.source.name]].push([val.IDOfLink]);
-			}
-		}
-	}
-	return edge;
-}*/
-
 function pointCloseness1(list, node_info, links)
 {
 	var arr = {};
@@ -551,7 +525,7 @@ function Process(memory, r) {
     }
 }
 
-function testNetworkComposite(list){
+function testReconciliation(list){
 	var N1 = {};
 	var N2 = {};
 	var len1, len2;
@@ -590,12 +564,9 @@ function testNetworkComposite(list){
 			}
 		}
 	}
-	console.log(edge_raw / 2);
-	console.log(edge_num / 2);
-	console.log(all_edge / 2);
-	console.log(parseFloat(edge_raw) / all_edge);
-	console.log(parseFloat(num_match) / all_edge);
-
+	var diff_num = edge_num / 2 - edge_raw / 2;
+	console.log(diff_num);
+	console.log(parseFloat(diff_num) / (all_edge / 2));
 }
 
 function NetworkComposite(N1, N2, iter_num){
@@ -654,7 +625,6 @@ function NetworkComposite(N1, N2, iter_num){
 					}
 				}
 			}
-			console.log(similarity_witness);
 			var max_witness = 0;
 			var max_k = 0;
 			var max_m = 0;
@@ -686,7 +656,6 @@ function NetworkComposite(N1, N2, iter_num){
 				}
 			}
 		}
-		console.log(composite_network);
 	}
 	return [composite_network, edge_raw];
 }
