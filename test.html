@@ -110,9 +110,7 @@ function tick() {
     var pathd = '';
 
     if (pathNodes.length > 0){
-      console.log(pathNodes);
       pathNodes.reverse();
-      console.log(pathNodes);
 
       pathd += 'M ';
       pathd += nodes[pathNodes[0]].x + ' ';
@@ -256,9 +254,6 @@ function draw(){
 
       //给边填色加粗
       edges_line
-        .transition()
-        .ease(circle)
-        .duration(4000)
         .style("stroke", function(line){
           var color = "#bf8639";
           spanningTreeLinks.forEach(function(variable){
@@ -409,7 +404,6 @@ function draw(){
         .style("stroke-width", 0.5)
 
       circle
-        .transition()
         .style("fill", function(d){
           return compute(point_betweeness[d.name]); 
         })
@@ -456,7 +450,6 @@ function draw(){
       var cluster_list = SLPA(list, node_info, 20, 0.5);
       var cluster_num = cluster_list.length;
       var cluster = {};
-      console.log(cluster_list);
       for (var i = 0; i < 200; ++i){
         cluster[i] = -1;
       }
@@ -495,7 +488,6 @@ function draw(){
         }
       }
 
-      svg.selectAll(".temppath").remove();
       temppath =
           svg.selectAll(".temppath")
           .data(all_path)
@@ -506,9 +498,7 @@ function draw(){
               var pathd = '';
 
               if (pathNodes.length > 0){
-                console.log(pathNodes);
                 pathNodes.reverse();
-                console.log(pathNodes);
 
                 pathd += 'M ';
                 pathd += nodes[pathNodes[0]].x + ' ';
@@ -543,7 +533,8 @@ function draw(){
           .style("stroke-width", 2)
           .style("fill", "none");
 
-      svg.selectAll("circle").remove();
+    svg.selectAll("circle").remove();
+    console.log(force.nodes())
       //圆圈
     circle = svg.append("g").selectAll("circle")
       .data(force.nodes())//表示使用force.nodes数据
@@ -557,57 +548,30 @@ function draw(){
       .on("click",function(node){
         //记录当前被点中的点的信息
         clickedNode = node;
-        //单击时让连接线加粗
-        edges_line
-          .style("stroke",function(line){
-            if(line.source.name==node.name || line.target.name==node.name){
-              if (line.source.x > node.x || line.target.x > node.x){
-                return "url(#forwardGradient)";
-              }
-              else{
-                return "url(#backGradient)";
-              }
-            }else{
-                return "#bf8639";
-            }
-          })
-          .style("stroke-width",function(line){
-            /*if(line.source.name==node.name || line.target.name==node.name){
+        edges_line.style("stroke-width",function(line){
+              if(line.source.name==node.name || line.target.name==node.name){
                 return 4;
-            }else{
+              }else{
                 return 0.5;
-            }*/
-            return 0.5;
-          });
-
+              }
+            });
         var html = "";
         html = getClickedNodeInfo(node);
         $('#node_info').html(html);
       })
       .call(force.drag);//将当前选中的元素传到drag函数中，使顶点可以被拖动
-  //圆圈的提示文字
-  circle.append("svg:title")  
+    //圆圈的提示文字
+    circle.append("svg:title")  
         .text(function(node) { 
             var link=links[node.index];
             if(node.name==link.source.name){
                 return "双击可查看详情"
             }
-         });  
-
-
-
-       /* svg.selectAll(".temppath")
-          .enter()
-          .append("path")
-          .attr({
-            'd': function() {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
-            'class':'temppath',
-            'id': 'temppath'+i
-          })
-          .style("stroke", "#bf8639")
-          .style("pointer-events", "none")
-          .style("stroke-width",0.5);//线条粗细*/
-      break;
+         });
+    force.stop();
+    force.tick();
+    force.start();
+    break;
   }
 }
 
@@ -797,9 +761,12 @@ function ThresholdList(t)
 }
 
 function ClearCanvas(){
+  svg.selectAll(".temppath").remove();
   edges_line
     .style("fill", "#bf8639")
-    .style("stroke", "#bf8639");
+    .style("stroke", "#bf8639")
+    .style("pointer-events", "none")
+    .style("stroke-width", "0.5");
   circle
     .style("fill", "#B43232")
     .style("stroke", "#B43232");
@@ -905,81 +872,6 @@ svg = d3.select("body").append("svg")
     .attr("position", "absolute");
 
 temppath = svg.selectAll(".temppath");
-  ///////////////////////////////////////////////////////////////////////////
-  ///////////// Create the gradient for the forward movement ////////////////
-  ///////////////////////////////////////////////////////////////////////////
-/*  var forwardGradient_list = [];
-  var defs;
-  var temp_gradient;
-  /*defs = svg.append("g").append("defs");
-    temp_gradient = defs.append("linearGradient")
-      .attr("id", "temp_gradient")
-    //.attr("gradientUnits", "userSpaceOnUse")
-      //.attr("id","forwardGradient")
-      .attr("x1","0%")
-      .attr("y1","0%")
-      .attr("x2","100%")
-      .attr("y2","0")
-      .attr("spreadMethod", "reflect");
-
-    temp_gradient.selectAll(".stop")
-      .data([   
-            {offset: 0, color: "#bf8639"},                               
-            {offset: 0.5, color: "#ffffff"},        
-            {offset: 1.0, color: "#bf8639"}     
-      ])                  
-      .enter().append("stop")
-      .attr("offset", function(d,i) { return d.offset; })   
-      .attr("stop-color", function(d) { return d.color; });
-
-    temp_gradient.append("animate")
-      .attr("attributeName","x1")
-      .attr("values","0%;100%")
-      .attr("dur", "7s")
-      .attr("repeatCount","indefinite");
-
-    temp_gradient.append("animate")
-      .attr("attributeName","x2")
-      .attr("values","100%;200%")
-      .attr("dur","7s")
-      .attr("repeatCount", "indefinite");
-
-  for (var j = 0; j < links.length; ++j){
-    defs = svg.append("g").append("defs");
-    temp_gradient = defs.append("linearGradient")
-    //.attr("gradientUnits", "userSpaceOnUse")
-      .attr("id","forwardGradient"+j)
-      .attr("x1","0%")
-      .attr("y1","0%")
-      .attr("x2","100%")
-      .attr("y2","0")
-      .attr("spreadMethod", "reflect");
-
-    temp_gradient.selectAll(".stop")
-      .data([   
-            {offset: 0, color: "#bf8639"},                          
-            {offset: 0.5, color: "#ffffff"},       
-            {offset: 1.0, color: "#bf8639"}     
-      ])                  
-      .enter().append("stop")
-      .attr("offset", function(d,i) { return d.offset; })   
-      .attr("stop-color", function(d) { return d.color; });
-
-    temp_gradient.append("animate")
-      .attr("attributeName","x1")
-      .attr("values","0%;100%")
-      .attr("dur", (links[j].value * 200) + "ms")
-      .attr("repeatCount","1");
-
-    temp_gradient.append("animate")
-      .attr("attributeName","x2")
-      .attr("values","100%;200%")
-      .attr("dur", (links[j].value * 200) + "ms")
-      .attr("repeatCount", "1");
-    forwardGradient_list.push(temp_gradient);
-  }
-  var micro_second = d3.transition()
-    .duration(1);*/
 
   var forwardGradient_list = [];
   var defs;
@@ -1064,26 +956,6 @@ edges_line = svg.selectAll(".edgepath")
       .style("stroke", "#bf8639")
       .style("pointer-events", "none")
       .style("stroke-width",0.5);//线条粗细
-
-/*svg.select("#edgepath")
-  .transition()
-  .delay()
-  .style("stroke", "url(#forwardGradient)");
-//$("#edgepath"+0).css("stroke", "url(#forwardGradient)");*/
-
-
-
-
-/*edges_text = svg.append("g").selectAll(".edgelabel")
-.data(force.links())
-.enter()
-.append("text")
-.style("pointer-events", "none")
-.attr({  'class':'edgelabel',
-               'id':function(d,i){return 'edgepath'+i;},
-               'dx':80,
-               'dy':0
-               });*/
 
 //圆圈
 circle = svg.append("g").selectAll("circle")
